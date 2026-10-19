@@ -33,6 +33,7 @@ fun GeoQuizScreen() {
     var currentIndex by remember { mutableStateOf(0) }
     var isAnswered by remember { mutableStateOf(false) } // Ответил ли пользователь на текущий вопрос
     var score by remember { mutableStateOf(0) } // Счётчик правильных ответов
+    var showResultDialog by remember { mutableStateOf(false) } // Показывать ли окно с результатом
 
     val currentQuestion = questionList[currentIndex]
 
@@ -43,6 +44,7 @@ fun GeoQuizScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // Текст вопроса
         Text(
             text = currentQuestion.text,
             fontSize = 22.sp,
@@ -83,16 +85,36 @@ fun GeoQuizScreen() {
                     Text("Next")
                 }
             } else {
-                // Если это был последний вопрос — выводим результат
+                // Если это был последний вопрос — кнопка вызова результата
                 Button(
-                    onClick = {
-                        // Здесь будет всплывающее окно (сделаем на следующем шаге)
-                    },
+                    onClick = { showResultDialog = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Показать результат")
                 }
             }
         }
+    }
+
+    // Всплывающее окно с результатом
+    if (showResultDialog) {
+        AlertDialog(
+            onDismissRequest = { showResultDialog = false },
+            title = { Text("Тест завершён!") },
+            text = {
+                Text("Правильных ответов: $score из ${questionList.size}", fontSize = 18.sp)
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showResultDialog = false
+                    // Сбрасываем тест заново
+                    currentIndex = 0
+                    score = 0
+                    isAnswered = false
+                }) {
+                    Text("Начать заново")
+                }
+            }
+        )
     }
 }
