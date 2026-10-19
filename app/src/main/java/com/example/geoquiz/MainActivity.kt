@@ -17,80 +17,91 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    GeoQuizScreen()
-                }
+                GeoQuizScreen()
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeoQuizScreen() {
     var currentIndex by remember { mutableStateOf(0) }
-    var isAnswered by remember { mutableStateOf(false) } // Ответил ли пользователь на текущий вопрос
-    var score by remember { mutableStateOf(0) } // Счётчик правильных ответов
-    var showResultDialog by remember { mutableStateOf(false) } // Показывать ли окно с результатом
+    var isAnswered by remember { mutableStateOf(false) }
+    var score by remember { mutableStateOf(0) }
+    var showResultDialog by remember { mutableStateOf(false) }
 
     val currentQuestion = questionList[currentIndex]
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Текст вопроса
-        Text(
-            text = currentQuestion.text,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
-        )
+    // Scaffold — это "каркас" экрана (шапка + контент)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("GeoTest", fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        }
+    ) { innerPadding ->
+        // Внутри контента учитываем отступы от шапки (innerPadding)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding) // Важно: чтобы шапка не перекрывала текст
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Текст вопроса
+            Text(
+                text = currentQuestion.text,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        // Кнопки ответов (скрываются, если уже ответили)
-        if (!isAnswered) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(onClick = {
-                    isAnswered = true
-                    if (currentQuestion.isTrueAnswer) score++
-                }) {
-                    Text("True")
-                }
-                Button(onClick = {
-                    isAnswered = true
-                    if (!currentQuestion.isTrueAnswer) score++
-                }) {
-                    Text("False")
-                }
-            }
-        } else {
-            // Если ответили, показываем кнопку Next (кроме последнего вопроса)
-            if (currentIndex < questionList.size - 1) {
-                Button(
-                    onClick = {
-                        currentIndex++
-                        isAnswered = false // Сбрасываем состояние для нового вопроса
-                    },
-                    modifier = Modifier.fillMaxWidth()
+            // Кнопки ответов (скрываются, если уже ответили)
+            if (!isAnswered) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    Text("Next")
+                    Button(onClick = {
+                        isAnswered = true
+                        if (currentQuestion.isTrueAnswer) score++
+                    }) {
+                        Text("True")
+                    }
+                    Button(onClick = {
+                        isAnswered = true
+                        if (!currentQuestion.isTrueAnswer) score++
+                    }) {
+                        Text("False")
+                    }
                 }
             } else {
-                // Если это был последний вопрос — кнопка вызова результата
-                Button(
-                    onClick = { showResultDialog = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Показать результат")
+                // Если ответили, показываем кнопку Next (кроме последнего вопроса)
+                if (currentIndex < questionList.size - 1) {
+                    Button(
+                        onClick = {
+                            currentIndex++
+                            isAnswered = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Next")
+                    }
+                } else {
+                    // Если это был последний вопрос — кнопка вызова результата
+                    Button(
+                        onClick = { showResultDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Показать результат")
+                    }
                 }
             }
         }
@@ -107,7 +118,6 @@ fun GeoQuizScreen() {
             confirmButton = {
                 TextButton(onClick = {
                     showResultDialog = false
-                    // Сбрасываем тест заново
                     currentIndex = 0
                     score = 0
                     isAnswered = false
