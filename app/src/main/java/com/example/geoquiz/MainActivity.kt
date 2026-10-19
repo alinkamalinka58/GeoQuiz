@@ -31,8 +31,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GeoQuizScreen() {
     var currentIndex by remember { mutableStateOf(0) }
+    var isAnswered by remember { mutableStateOf(false) } // Ответил ли пользователь на текущий вопрос
+    var score by remember { mutableStateOf(0) } // Счётчик правильных ответов
 
-    // Защита от выхода за пределы массива
     val currentQuestion = questionList[currentIndex]
 
     Column(
@@ -42,7 +43,6 @@ fun GeoQuizScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Текст вопроса
         Text(
             text = currentQuestion.text,
             fontSize = 22.sp,
@@ -51,16 +51,47 @@ fun GeoQuizScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Кнопки ответов
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Button(onClick = { /* логика позже */ }) {
-                Text("True")
+        // Кнопки ответов (скрываются, если уже ответили)
+        if (!isAnswered) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(onClick = {
+                    isAnswered = true
+                    if (currentQuestion.isTrueAnswer) score++
+                }) {
+                    Text("True")
+                }
+                Button(onClick = {
+                    isAnswered = true
+                    if (!currentQuestion.isTrueAnswer) score++
+                }) {
+                    Text("False")
+                }
             }
-            Button(onClick = { /* логика позже */ }) {
-                Text("False")
+        } else {
+            // Если ответили, показываем кнопку Next (кроме последнего вопроса)
+            if (currentIndex < questionList.size - 1) {
+                Button(
+                    onClick = {
+                        currentIndex++
+                        isAnswered = false // Сбрасываем состояние для нового вопроса
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Next")
+                }
+            } else {
+                // Если это был последний вопрос — выводим результат
+                Button(
+                    onClick = {
+                        // Здесь будет всплывающее окно (сделаем на следующем шаге)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Показать результат")
+                }
             }
         }
     }
