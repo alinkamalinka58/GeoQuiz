@@ -1,0 +1,18 @@
+package com.example.geoquiz
+
+// Модель одного вопроса
+data class Question(
+    val text: String,
+    val isTrueAnswer: Boolean
+)
+
+// Список вопросов из задания
+val questionList = listOf(
+    Question("Canberra is the capital of Australia.", true),
+    Question("The Pacific Ocean is larger than the Atlantic Ocean.", true),
+    Question("The Suez Canal connects the Red Sea and the Indian Ocean.", true),
+    Question("The source of the Nile River is in Egypt.", false),
+    Question("The Amazon River is the longest river in the Americas.", false),
+    Question("Lake Baikal is the world's oldest and deepest freshwater lake.", true),
+    Question("The capital of France is Berlin.", true) // 7-й вопрос из задания
+)
